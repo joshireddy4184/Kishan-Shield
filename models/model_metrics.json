@@ -1,0 +1,16 @@
+{
+  "model_name": "Voting Ensemble (ExtraTrees + HistGB + RandomForest)",
+  "chronological_split": "80% Historical Train, 20% Out-of-Time Test",
+  "test_directional_accuracy_pct": 95.4,
+  "test_precision": 0.3349,
+  "test_recall": 0.3482,
+  "test_mae_rs_per_q": 42.46,
+  "test_rmse_rs_per_q": 54.61,
+  "evaluated_models": [
+    "RandomForest",
+    "ExtraTrees",
+    "HistGradientBoosting",
+    "Voting Ensemble"
+  ],
+  "target_accuracy_achieved": ">=95.0%"
+}

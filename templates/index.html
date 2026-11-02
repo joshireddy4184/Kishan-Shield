@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌾 Kishan Shield AI - Real-World Farmer Decision & Market Intelligence Platform</title>
+  <meta name="description" content="AI-Powered Agricultural Decision Support Platform for Indian Farmers: Live Device GPS, Real-Time Weather & Spray Advisories, Input Over-Application Audit, APMC Net Realization & 14 Indian Languages.">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Custom Agriculture-Themed Design System Styles -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+  
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span style="font-size: 1.6rem;">🌾</span>
+        <div class="sidebar-brand" data-i18n="sidebar.brand">Kishan Shield AI</div>
+      </div>
+      
+      <button class="assess-btn-sidebar" onclick="assessFarmDecisions()" data-i18n="sidebar.assessBtn">
+        🌾 Assess Farm & Markets
+      </button>
+
+      <ul class="sidebar-menu">
+        <li class="nav-item active" onclick="switchView('v-landing')">
+          <i data-lucide="home"></i> <span data-i18n="sidebar.home">Home Overview</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-onboarding')">
+          <i data-lucide="user-check"></i> <span data-i18n="sidebar.onboarding">Farmer Onboarding</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-dashboard')">
+          <i data-lucide="layout-dashboard"></i> <span data-i18n="sidebar.dashboard">Farmer Dashboard</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-weather')">
+          <i data-lucide="cloud-sun"></i> <span data-i18n="sidebar.weather">Weather & Spraying</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-krishiproof')">
+          <i data-lucide="shield-check"></i> <span data-i18n="sidebar.krishiproof">KrishiProof Advice</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-inputtruth')">
+          <i data-lucide="receipt"></i> <span data-i18n="sidebar.inputtruth">InputTruth Invoices</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-farmexit')">
+          <i data-lucide="calculator"></i> <span data-i18n="sidebar.farmexit">FarmExit Economics</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-marketshield')">
+          <i data-lucide="store"></i> <span data-i18n="sidebar.marketshield">MarketShield APMC</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-map')">
+          <i data-lucide="map-pin"></i> <span data-i18n="sidebar.map">APMC Market Map</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-price')">
+          <i data-lucide="trending-up"></i> <span data-i18n="sidebar.price">Price Intelligence</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-policy')">
+          <i data-lucide="landmark"></i> <span data-i18n="sidebar.policy">Policy & Trade</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-simulator')">
+          <i data-lucide="sliders"></i> <span data-i18n="sidebar.simulator">What-If Simulator</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-passport')">
+          <i data-lucide="award"></i> <span data-i18n="sidebar.passport">Decision Passport</span>
+        </li>
+        <li class="nav-item" onclick="switchView('v-memory')">
+          <i data-lucide="history"></i> <span data-i18n="sidebar.memory">Farm Memory</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-tagline" data-i18n="topbar.tagline">
+            "Protect the farmer's decision, not just the crop."
+          </div>
+        </div>
+
+        <div class="topbar-status">
+          <!-- Live GPS Status Badge -->
+          <div class="topbar-location-badge" id="topbar-loc-badge" title="Device Location Status">
+            <span id="loc-indicator-dot" class="dot-gps-detecting"></span>
+            <span id="topbar-loc-text">Detecting GPS...</span>
+            <button class="btn-refresh-loc-icon" onclick="autoDetectDeviceLocation(true)" title="Refresh GPS Location">🔄</button>
+          </div>
+
+          <!-- Live Weather Pill -->
+          <div class="topbar-weather-badge" id="topbar-weather-badge" onclick="switchView('v-weather')" style="cursor: pointer;" title="View Weather & Spraying Advisory">
+            <span id="topbar-weather-icon">☀️</span>
+            <span id="topbar-weather-temp">--°C</span>
+          </div>
+
+          <!-- 14 Indian Languages Dropdown Selector -->
+          <select id="lang-select" class="form-select" style="width: auto; padding: 6px 12px; font-size: 0.88rem; font-weight: 600;" onchange="changeLanguage(this.value)">
+            <option value="en">English (English)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+            <option value="ml">മലയാളം (Malayalam)</option>
+            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="or">ଓଡ଼ିଆ (Odia)</option>
+            <option value="as">অসমীয়া (Assamese)</option>
+            <option value="ur">اردو (Urdu)</option>
+            <option value="sa">संस्कृतम् (Sanskrit)</option>
+          </select>
+        </div>
+      </header>
+
+      <!-- 1. LANDING PAGE OVERVIEW -->
+      <section id="v-landing" class="view-container active">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="landing.title">🌾 Kishan Shield AI Platform</h1>
+          <p class="page-subtitle" data-i18n="landing.subtitle">Smart Agricultural Decision Support & Financial Risk Protection for Farmers</p>
+        </div>
+        
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-title" data-i18n="landing.card1Title">1. Should I Buy?</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;" data-i18n="landing.card1Desc">
+              Verify fertilizer/pesticide advice & dealer recommendations with KrishiProof & InputTruth.
+            </p>
+            <button class="btn-primary" onclick="switchView('v-krishiproof')" data-i18n="landing.card1Btn">Verify Advice & Inputs</button>
+          </div>
+          <div class="card">
+            <div class="card-title" data-i18n="landing.card2Title">2. Should I Continue?</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;" data-i18n="landing.card2Desc">
+              Evaluate sunk cost vs remaining investment vs break-even yield in FarmExit.
+            </p>
+            <button class="btn-primary" onclick="switchView('v-farmexit')" data-i18n="landing.card2Btn">Calculate Economics</button>
+          </div>
+          <div class="card">
+            <div class="card-title" data-i18n="landing.card3Title">3. Where & When Should I Sell?</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;" data-i18n="landing.card3Desc">
+              Rank nearby APMCs by NET REALIZATION and forecast 7-day price direction.
+            </p>
+            <button class="btn-primary" onclick="switchView('v-marketshield')" data-i18n="landing.card3Btn">View APMC Net Prices</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. FARMER ONBOARDING -->
+      <section id="v-onboarding" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="onboarding.title">Farmer Profile & Location Setup</h1>
+          <p class="page-subtitle" data-i18n="onboarding.subtitle">Automatic device GPS detection and crop parameters</p>
+        </div>
+
+        <div class="card" style="max-width: 680px;">
+          <form id="onboarding-form" onsubmit="handleOnboarding(event)">
+            <div class="form-group">
+              <label class="form-label" data-i18n="onboarding.nameLabel">Farmer Full Name</label>
+              <input type="text" id="ob-name" class="form-input" value="Ramesh Patil" required>
+            </div>
+
+            <!-- GPS Detection Box -->
+            <div class="form-group" style="background: #f0fdf4; border: 1px solid var(--border-green); padding: 16px; border-radius: 10px;">
+              <label class="form-label" style="color: var(--primary-emerald);" data-i18n="onboarding.gpsLabel">Real-Time Device GPS Location</label>
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+                <button type="button" class="btn-primary" style="background-color: var(--primary-leaf);" onclick="autoDetectDeviceLocation(true)" data-i18n="onboarding.gpsBtn">
+                  📍 Detect Device GPS Location
+                </button>
+              </div>
+              <div id="location-status" style="font-size: 0.88rem; color: var(--primary-emerald);" data-i18n="onboarding.gpsStatus">
+                Attempting automatic GPS detection...
+              </div>
+            </div>
+
+            <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="onboarding.stateLabel">State</label>
+                <input type="text" id="ob-state" class="form-input" value="Maharashtra" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="onboarding.districtLabel">District</label>
+                <input type="text" id="ob-district" class="form-input" value="Nashik" required>
+              </div>
+            </div>
+
+            <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="onboarding.cropLabel">Primary Crop</label>
+                <select id="ob-crop" class="form-select">
+                  <option value="Onion">Onion</option>
+                  <option value="Tomato">Tomato</option>
+                  <option value="Potato">Potato</option>
+                  <option value="Wheat">Wheat</option>
+                  <option value="Maize">Maize</option>
+                  <option value="Soybean">Soybean</option>
+                  <option value="Cotton">Cotton</option>
+                  <option value="Paddy">Paddy / Rice</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="onboarding.acresLabel">Cultivated Land Area (Acres)</label>
+                <input type="number" step="0.5" id="ob-acres" class="form-input" value="3.0" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;" data-i18n="onboarding.saveBtn">
+              Save Profile & Update Farm Data
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 3. MAIN DASHBOARD -->
+      <section id="v-dashboard" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="dash.title">Farmer Decision & Intelligence Dashboard</h1>
+          <p class="page-subtitle" data-i18n="dash.subtitle">Real-time crop risk status, live weather, and market realization</p>
+        </div>
+
+        <!-- Prominent Live Farm Location & Weather Banner -->
+        <div class="live-location-banner" id="dash-live-banner">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <span id="dash-gps-dot" class="dot-gps-detecting"></span>
+                <span class="stat-label" style="margin-bottom:0;" data-i18n="dash.locationTitle">Current Farm Location</span>
+                <span class="indicator-pill pill-green" id="dash-loc-mode" style="font-size: 0.75rem; padding: 2px 8px;" data-i18n="dash.gpsActive">GPS Active</span>
+              </div>
+              <div style="font-size: 1.35rem; font-weight: 800; color: var(--primary-emerald);" id="dash-loc-name">
+                Detecting your location...
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" id="dash-loc-coords">
+                Coordinates: Acquiring GPS fix...
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div class="weather-compact-card">
+                <span style="font-size: 1.8rem;" id="dash-weather-icon">☀️</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);" id="dash-weather-temp">--°C</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);" id="dash-weather-desc">Loading weather...</div>
+                </div>
+              </div>
+              <button class="btn-refresh-loc-pill" onclick="autoDetectDeviceLocation(true)" data-i18n="dash.refreshLoc">
+                🔄 Refresh GPS Location
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-green); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.88rem; color: var(--text-main);">
+              <strong data-i18n="dash.sprayingAdvice">Spraying & Field Advisory:</strong>
+              <span id="dash-spraying-status" style="margin-left: 6px; font-weight: 600; color: #15803d;">Favorable for spraying & field operations</span>
+            </div>
+            <button class="btn-primary" style="padding: 6px 14px; font-size: 0.82rem;" onclick="switchView('v-weather')" data-i18n="dash.viewWeatherBtn">
+              View 3-Day Agri Weather Forecast →
+            </button>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <div class="stat-label" data-i18n="dash.cropLabel">Crop & Cultivated Area</div>
+            <div class="stat-value" id="dash-crop-acreage">Onion (3.0 Acres)</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;" data-i18n="dash.cropYieldSub">Expected Harvest: 50 Quintals (5 Tonnes)</div>
+          </div>
+          <div class="card">
+            <div class="stat-label" data-i18n="dash.investedLabel">Total Investment to Date</div>
+            <div class="stat-value" style="color: #b45309;" id="dash-invested">₹52,000</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;" data-i18n="dash.sunkSub">Committed Capital</div>
+          </div>
+          <div class="card">
+            <div class="stat-label" data-i18n="dash.riskLabel">Financial Risk Exposure</div>
+            <div class="stat-value" style="color: #15803d;" id="dash-risk">LOW RISK</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;" data-i18n="dash.roiSub">Projected ROI: Positive</div>
+          </div>
+          <div class="card">
+            <div class="stat-label" data-i18n="dash.outlookLabel">7-Day Price Direction</div>
+            <div class="stat-value" style="color: #15803d;" id="dash-price-outlook">↗ INCREASING</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;" data-i18n="dash.estRangeSub">Model Confidence: 95.4%</div>
+          </div>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 2fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="dash.bestMarketTitle">Recommended APMC Market (Highest Net Realization)</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #15803d;" id="dash-best-market">Pimpalgaon Baswant APMC</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;" id="dash-market-details">
+              Gross Price: ₹2,650/q | Transport (18km): ₹180/q | Net Realization: <strong style="color: #15803d;">₹2,420/q</strong>
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title" data-i18n="dash.masterRecTitle">Unified Selling Recommendation</div>
+            <div class="indicator-pill pill-green" style="font-size: 1.1rem;" id="dash-action" data-i18n="dash.actionPill">SELL 40% / HOLD 60%</div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;" id="dash-action-reason" data-i18n="dash.actionReason">
+              Lock in 40% returns at current peak net prices; retain 60% for forecasted 7-day price gains.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. WEATHER & SPRAYING ADVISORY VIEW -->
+      <section id="v-weather" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="weather.title">Real-Time Farm Weather & Spraying Advisory</h1>
+          <p class="page-subtitle" data-i18n="weather.subtitle">Hyper-local hourly and 3-day agricultural weather forecast for your farm coordinates</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 2fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="weather.currentTitle">Current Field Weather</div>
+            <div style="display: flex; align-items: center; gap: 20px; margin: 16px 0;">
+              <span style="font-size: 3.5rem;" id="weather-view-icon">☀️</span>
+              <div>
+                <div style="font-size: 2.8rem; font-weight: 800; color: var(--primary-emerald);" id="weather-view-temp">--°C</div>
+                <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-main);" id="weather-view-desc">Clear Sky</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);" id="weather-view-loc">Farm Coordinates</div>
+              </div>
+            </div>
+            <div class="card-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 16px; margin-bottom: 0;">
+              <div>
+                <div class="stat-label" data-i18n="weather.humidity">Relative Humidity</div>
+                <div style="font-size: 1.25rem; font-weight: 700;" id="weather-view-humidity">--%</div>
+              </div>
+              <div>
+                <div class="stat-label" data-i18n="weather.wind">Wind Speed</div>
+                <div style="font-size: 1.25rem; font-weight: 700;" id="weather-view-wind">-- km/h</div>
+              </div>
+              <div>
+                <div class="stat-label" data-i18n="weather.precip">Precipitation</div>
+                <div style="font-size: 1.25rem; font-weight: 700;" id="weather-view-precip">0.0 mm</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="card-title" data-i18n="weather.sprayTitle">Pesticide & Foliar Spraying Window</div>
+              <div class="indicator-pill pill-green" id="weather-spray-pill" style="font-size: 1.05rem; margin: 12px 0;">FAVORABLE</div>
+              <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;" id="weather-spray-reason">
+                Wind speed and rainfall risk are optimal. Early morning or late afternoon application recommended.
+              </p>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 0.85rem;">
+              <strong>💡 Farm Tip:</strong> Avoid spraying during noon peak temperatures to minimize chemical evaporation and leaf scorch.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="weather.forecastTitle">3-Day Agricultural Outlook</div>
+          <div class="weather-forecast-grid" id="weather-forecast-cards">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. KRISHIPROOF ADVICE TRUST ENGINE -->
+      <section id="v-krishiproof" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="kp.title">KrishiProof — Agricultural Advice Verification</h1>
+          <p class="page-subtitle" data-i18n="kp.subtitle">Examine dealer recommendations, WhatsApp advice, or chemical spray suggestions</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="kp.submitTitle">Submit Advisory for Verification</div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="kp.contentLabel">Paste Advisory Text / Dealer Recommendation</label>
+              <textarea id="kp-text" class="form-textarea" rows="6">Dealer recommends applying 3 bags of proprietary root booster tonic immediately for maximum bulb size and double yield.</textarea>
+            </div>
+            <button class="btn-primary" onclick="evaluateKrishiProof()" data-i18n="kp.analyzeBtn">Verify Advice Reliability</button>
+          </div>
+
+          <div class="card" id="kp-result-card">
+            <div class="card-title" data-i18n="kp.resultTitle">Verification Assessment Results</div>
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+              <div style="font-size: 3rem; font-weight: 800; color: #b45309;" id="kp-score">61/100</div>
+              <div>
+                <div class="indicator-pill pill-amber" id="kp-risk-pill" data-i18n="kp.riskPill">HIGH ADVICE RISK</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" id="kp-bias" data-i18n="kp.biasText">Potential Commercial Bias Detected</div>
+              </div>
+            </div>
+            <ul id="kp-reasons" style="font-size: 0.88rem; color: var(--text-muted); padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+              <li>Missing specific crop growth stage and disease severity criteria.</li>
+              <li>Advice originates from unverified retail sales channel.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. INPUTTRUTH INVOICE ANALYZER -->
+      <section id="v-inputtruth" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="it.title">InputTruth — Fertilizer & Pesticide Invoice Audit</h1>
+          <p class="page-subtitle" data-i18n="it.subtitle">Compare input quantities against ICAR / Agronomic benchmarks per acre</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="it.invoiceTitle">Input Purchase Invoice Details</div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="it.prodLabel">Product / Chemical Name</label>
+              <input type="text" id="it-prod" class="form-input" value="Special Soil Growth & Complex NPK Booster">
+            </div>
+            <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="it.qtyLabel">Purchased Quantity (kg)</label>
+                <input type="number" id="it-qty" class="form-input" value="75.0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="it.priceLabel">Unit Price (₹/kg)</label>
+                <input type="number" id="it-price" class="form-input" value="140.0">
+              </div>
+            </div>
+            <button class="btn-primary" onclick="evaluateInputTruth()" data-i18n="it.analyzeBtn">Analyze Purchase for Over-Application</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="it.benchTitle">Agronomic Benchmark Comparison</div>
+            <div style="margin-bottom: 12px;">
+              <div class="stat-label" data-i18n="it.avoidableLabel">Potential Avoidable Expenditure</div>
+              <div class="stat-value" style="color: #b91c1c;" id="it-avoidable">₹2,800.00</div>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+              <div><span data-i18n="it.purchasedLabel">• Purchased Quantity:</span> <strong id="it-purchased-str" style="color: var(--text-main);">75.0 kg</strong></div>
+              <div><span data-i18n="it.recLabel">• Recommended Benchmark:</span> <strong id="it-rec-str" style="color: var(--text-main);">55.0 kg</strong></div>
+              <div><span data-i18n="it.excessLabel">• Potential Excess:</span> <strong id="it-excess-str" style="color: #b91c1c;">20.0 kg</strong></div>
+              <div style="font-style: italic; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);" id="it-note">
+                "Potentially excessive based on available agronomic benchmark information."
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. FARMEXIT ECONOMICS -->
+      <section id="v-farmexit" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="fe.title">FarmExit — Crop Financial Viability Engine</h1>
+          <p class="page-subtitle" data-i18n="fe.subtitle">Determine whether continuing crop investment makes financial sense</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="fe.inputsTitle">Crop Financial Inputs</div>
+            <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="fe.sunkLabel">Sunk Cost (Invested ₹)</label>
+                <input type="number" id="fe-sunk" class="form-input" value="52000">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="fe.remLabel">Remaining Projected Cost (₹)</label>
+                <input type="number" id="fe-rem" class="form-input" value="18000">
+              </div>
+            </div>
+            <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="fe.yieldLabel">Expected Harvest Yield (Quintals)</label>
+                <input type="number" id="fe-yield" class="form-input" value="50">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="fe.priceLabel">Current Local Market Price (₹/q)</label>
+                <input type="number" id="fe-price" class="form-input" value="2480">
+              </div>
+            </div>
+            <button class="btn-primary" onclick="evaluateFarmExit()" data-i18n="fe.calcBtn">Calculate Financial Viability</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="fe.outputTitle">Financial Viability Assessment</div>
+            <div class="indicator-pill pill-green" style="font-size: 1.2rem; margin-bottom: 16px;" id="fe-rec" data-i18n="fe.recPill">CONTINUE CROP INVESTMENT</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+              <div><span data-i18n="fe.beTotalLabel">• Total Cost Break-Even Price:</span> <strong id="fe-be-total" style="color: #0284c7;">₹1,580/q</strong></div>
+              <div><span data-i18n="fe.beRemLabel">• Marginal Break-Even Price:</span> <strong id="fe-be-rem" style="color: #15803d;">₹540/q</strong></div>
+              <div><span data-i18n="fe.profitLabel">• Projected Net Profit:</span> <strong id="fe-profit" style="color: #15803d;">₹48,500</strong></div>
+              <div><span data-i18n="fe.roiLabel">• Estimated Return on Capital:</span> <strong id="fe-roi" style="color: #15803d;">+69.2%</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. MARKETSHIELD APMC NET REALIZATION -->
+      <section id="v-marketshield" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="ms.title">MarketShield — Nearby APMC Net Realization</h1>
+          <p class="page-subtitle" data-i18n="ms.subtitle">Ranks APMC & e-NAM mandis by True Net Realization (Gross Price minus Transport minus Mandi Cess)</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-title" data-i18n="ms.tableTitle">Regional APMC Mandi Comparison Table</div>
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
+                <th style="padding: 10px;" data-i18n="ms.colName">Market Name</th>
+                <th data-i18n="ms.colDist">Distance</th>
+                <th data-i18n="ms.colGross">Gross Price</th>
+                <th data-i18n="ms.colTrans">Transport Cost</th>
+                <th data-i18n="ms.colFees">Mandi Fees</th>
+                <th data-i18n="ms.colNet">NET REALIZATION</th>
+                <th data-i18n="ms.colAction">Select</th>
+              </tr>
+            </thead>
+            <tbody id="market-table-body">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 9. APMC MAP -->
+      <section id="v-map" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="map.title">APMC Geographic Intelligence Map</h1>
+          <p class="page-subtitle" data-i18n="map.subtitle">Verified farm coordinates & surrounding government regulated markets</p>
+        </div>
+        <div id="map-container"></div>
+      </section>
+
+      <!-- 10. PRICE INTELLIGENCE & FORECAST -->
+      <section id="v-price" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="pi.title">Price Intelligence & 7-Day Direction Forecast</h1>
+          <p class="page-subtitle" data-i18n="pi.subtitle">Machine learning price direction and arrival trend analysis</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="pi.dirTitle">7-Day Price Direction Outlook</div>
+            <div class="stat-value" style="color: #15803d;" id="pi-direction" data-i18n="pi.dirPill">↗ LIKELY INCREASE</div>
+            <div style="font-size: 1.2rem; font-weight: 700; margin: 12px 0;" id="pi-range" data-i18n="pi.targetRange">Target Price Range: ₹2,540 – ₹2,680/q</div>
+            <div class="indicator-pill pill-green" id="pi-conf" data-i18n="pi.confPill">Model Confidence: 95.4%</div>
+            
+            <div style="margin-top: 16px;">
+              <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 6px;" data-i18n="pi.factorsTitle">Key Market Drivers:</div>
+              <ul id="pi-factors" style="font-size: 0.85rem; color: var(--text-muted); padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
+                <li>🟢 Declining daily arrivals in major regional hub mandis (-12.4% WoW)</li>
+                <li>🟢 7-day moving average modal price trending upward (+3.8%)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="pi.valTitle">Model Reliability & Validation Standards</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+              <div><span data-i18n="pi.modelTypeLabel">• Algorithm:</span> <strong>Voting Ensemble (ExtraTrees + HistGB + RandomForest)</strong></div>
+              <div><span data-i18n="pi.valProtoLabel">• Validation Method:</span> <strong>Chronological Split (80% Train, 20% Test)</strong></div>
+              <div><span data-i18n="pi.dirAccLabel">• Directional Accuracy:</span> <strong style="color: #15803d;">95.40%</strong></div>
+              <div><span data-i18n="pi.maeLabel">• Mean Absolute Error:</span> <strong style="color: #0284c7;">₹42.46/quintal</strong></div>
+              <div><span data-i18n="pi.rmseLabel">• Root Mean Squared Error:</span> <strong style="color: #0284c7;">₹54.61/quintal</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. POLICY & TRADE INTELLIGENCE -->
+      <section id="v-policy" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="pol.title">Government Policy & Trade Signals</h1>
+          <p class="page-subtitle" data-i18n="pol.subtitle">Official DGFT, Ministry of Agriculture & APEDA market impact updates</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="pol.card1Title">Active Government Policy Impact</div>
+            <div style="font-weight: 700; color: #0284c7; margin-bottom: 6px;" id="pol-title">Export Duty Reduction on Onions (DGFT)</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;" id="pol-source">Source: Directorate General of Foreign Trade (Notification 18/2024-25)</div>
+            <div style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 6px;" id="pol-chain">
+              <div>1. Export duty reduced from 40% to 20%</div>
+              <div>2. International off-take from regional mandis accelerates</div>
+              <div>3. Local market excess arrivals absorbed</div>
+              <div>4. 🟢 Farmgate price support expected (+₹150–₹300/q)</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="pol.card2Title">Global Trade Signals</div>
+            <div style="font-weight: 700; color: #15803d; margin-bottom: 6px;" id="pol-global-title">Middle East & Asian Export Demand</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;" id="pol-global-source">Source: APEDA Agricultural Trade Statistics</div>
+            <p style="font-size: 0.88rem; color: var(--text-muted);" id="pol-apeda-text" data-i18n="pol.apedaText">
+              Strong export orders registered at major sea ports for Indian agricultural produce due to regional supply deficits in Gulf markets.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12. WHAT-IF SIMULATOR -->
+      <section id="v-simulator" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="sim.title">What-If Market Sensitivity Simulator</h1>
+          <p class="page-subtitle" data-i18n="sim.subtitle">Simulate market shocks: sudden arrival spikes, price drops, or transport changes</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="card-title" data-i18n="sim.controlsTitle">Scenario Parameters</div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="sim.arrLabel">Market Arrival Change (%)</label>
+              <input type="number" id="sim-arr" class="form-input" value="20">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="sim.dropLabel">Price Change (%)</label>
+              <input type="number" id="sim-drop" class="form-input" value="-10">
+            </div>
+            <button class="btn-primary" onclick="runSimulation()" data-i18n="sim.runBtn">Simulate Scenario Impact</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="sim.outputTitle">Projected Scenario Outcome</div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: #b45309; margin-bottom: 12px;" data-i18n="sim.disclaimer">
+              ⚠️ SENSITIVITY ANALYSIS — Agricultural scenario simulation for planning
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+              <div><span data-i18n="sim.baseNetLabel">• Base Net Realization:</span> <strong style="color: var(--text-main);">₹2,440/q</strong></div>
+              <div><span data-i18n="sim.simNetLabel">• Simulated Net Realization:</span> <strong id="sim-net-price" style="color: #b91c1c;">₹2,025/q</strong></div>
+              <div><span data-i18n="sim.impactLabel">• Projected Profit Impact:</span> <strong id="sim-profit-delta" style="color: #b91c1c;">-₹20,750</strong></div>
+              <div><span data-i18n="sim.actionLabel">• Strategic Advisory:</span> <strong id="sim-action" style="color: #0284c7;">SELL PARTIALLY BEFORE ARRIVAL PEAK</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13. DECISION PASSPORT -->
+      <section id="v-passport" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="pass.title">Farm Decision Passport (Season Assessment)</h1>
+          <p class="page-subtitle" data-i18n="pass.subtitle">Unified multi-engine agricultural decision report</p>
+        </div>
+
+        <div class="card" style="max-width: 780px; border: 2px solid var(--primary-leaf);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-weight: 800; font-size: 1.4rem; color: var(--primary-emerald);" id="pass-code">FARM DECISION #027</h2>
+              <div style="font-size: 0.85rem; color: var(--text-muted);" id="pass-farmer">Ramesh Patil | Onion (3 Acres) | Nashik, Maharashtra</div>
+            </div>
+            <div class="indicator-pill pill-green" style="font-size: 1.1rem;" id="pass-recommendation">SELL 40% / HOLD 60%</div>
+          </div>
+
+          <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 16px;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-muted);" data-i18n="pass.trustLabel">ADVICE TRUST SCORE</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #b45309;" id="pass-trust">61/100 (HIGH RISK)</div>
+            </div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-muted);" data-i18n="pass.inputLabel">INPUT COST RISK</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #b91c1c;" id="pass-input">₹2,800 AVOIDABLE COST</div>
+            </div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-muted);" data-i18n="pass.marketLabel">OPTIMAL APMC MANDI</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #0284c7;" id="pass-market">Pimpalgaon Baswant</div>
+            </div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-muted);" data-i18n="pass.outlookLabel">7-DAY PRICE OUTLOOK</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #15803d;" id="pass-forecast">↗ INCREASE (95.4%)</div>
+            </div>
+          </div>
+
+          <div style="background: #f0fdf4; padding: 14px; border-radius: 8px; border-left: 4px solid var(--primary-leaf);">
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--primary-emerald); margin-bottom: 4px;" data-i18n="pass.rationaleTitle">Primary Decision Rationale:</div>
+            <div style="font-size: 0.88rem; color: var(--text-main);" id="pass-reason">
+              Current net realization at Pimpalgaon Baswant (₹2,420/q) is attractive. Partial selling (40%) eliminates capital risk while preserving 60% for expected 7-day price upside.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14. FARM MEMORY -->
+      <section id="v-memory" class="view-container">
+        <div class="page-header">
+          <h1 class="page-title" data-i18n="mem.title">Farm Memory & Multi-Season Learning</h1>
+          <p class="page-subtitle" data-i18n="mem.subtitle">Tracking farmer decisions and financial outcomes across seasons</p>
+        </div>
+
+        <div class="card-grid" id="memory-cards">
+          <!-- Dynamically loaded -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- AI ASSISTANT CHAT DRAWER -->
+  <div id="chat-drawer" class="chat-drawer collapsed">
+    <div class="chat-header">
+      <div>
+        <div style="font-weight: 800; font-size: 1.05rem;" data-i18n="chat.title">🤖 Kishan Shield AI Assistant</div>
+        <div style="font-size: 0.78rem; opacity: 0.9;" data-i18n="chat.subtitle">Live Agricultural Intelligence & Decision Support</div>
+      </div>
+      <button id="chat-close-btn" class="chat-close-btn" onclick="toggleChat(false)" title="Close Chatbot">✕</button>
+    </div>
+    <div id="chat-box" class="chat-body">
+      <div class="chat-msg assistant" data-i18n="chat.welcome">
+        Namaste! I am your <strong>Kishan Shield AI Assistant</strong>.<br>
+        Ask me about local mandi prices, when to sell, fertilizer safety, crop diseases, or today's spraying weather!
+      </div>
+    </div>
+    <div class="chat-footer">
+      <textarea id="chat-input" class="form-input chat-textarea" placeholder="Ask about crop prices, selling timing, fertilizer dosage, weather..." rows="1" onkeydown="handleChatKeyDown(event)" data-i18n-placeholder="chat.placeholder"></textarea>
+      <button class="btn-primary" onclick="sendChatMessage()" id="chat-send-btn" data-i18n="chat.sendBtn">Send</button>
+    </div>
+  </div>
+
+  <!-- FLOATING AI ASSISTANT LAUNCHER BUTTON -->
+  <button id="chat-float-btn" class="chat-floating-btn" onclick="toggleChat(true)" title="Ask Kishan Shield AI">
+    <span style="font-size: 1.2rem;">🤖</span> <span data-i18n="chat.floatBtn">Ask Kishan Shield AI</span>
+  </button>
+
+  <!-- Translations & Application JS -->
+  <script src="/static/js/translations.js"></script>
+  <script src="/static/js/app.js"></script>
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
